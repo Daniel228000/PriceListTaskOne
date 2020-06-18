@@ -2,6 +2,7 @@ package PriceListPackage;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class PriceList {
 
@@ -10,17 +11,17 @@ public class PriceList {
     public PriceList() {
         priceList = new HashMap<Integer, Item>();
     }
-    public PriceList( Map<Integer, Item> priceList) {
+
+    public PriceList(Map<Integer, Item> priceList) {
         this.priceList = new HashMap<Integer, Item>(priceList);
     }
 
 
-    public boolean changePrice(int code, int newPriceOne, int newPriceTwo) {
+    public boolean changePrice(int code, Price price) {
         boolean flag = false;
         Item item = priceList.get(code);
         if (item != null) {
-            item.setPriceOne(newPriceOne);
-            item.setPriceTwo(newPriceTwo);
+            item.setPrice(price);
             flag = true;
         }
         return flag;
@@ -36,27 +37,23 @@ public class PriceList {
         return flag;
     }
 
+
+
+
     public boolean addItem(int code, Item item) {
-        if (priceList.containsKey(code)) {
-            return false;
-        } else {
-            priceList.putIfAbsent(code, item);
-            return true;
-        }
+        return priceList.putIfAbsent(code, item) == null;
     }
 
     public boolean removeItem(int code) {
         return priceList.remove(code) != null;
     }
 
-    public String sumOfItems(int code, int quantity) {
-        int sumOne;
-        int sumTwo;
+    public Price sumOfItems(int code, int quantity) {
+        Price price = new Price(0,0);
         Item item = priceList.get(code);
-        if (item == null) return "0.0";
-        sumOne = item.getPriceOne() * quantity + item.getPriceTwo() * quantity / 100 - item.getPriceTwo() / 100 % 100 ;
-        sumTwo = (item.getPriceTwo() * quantity - ((sumOne - item.getPriceOne() * quantity) * 100)) % 100;
-        return sumOne + "." + sumTwo;
+        if (item == null) throw  new IllegalArgumentException("No product with this code");
+        return new Price(item.getPrice().getPriceByKopecks() * quantity);
+
     }
 
     public Item getItem(int code) {
@@ -68,14 +65,5 @@ public class PriceList {
         if (item != null) {
             return item.getName();
         } else throw new IllegalArgumentException("No item for this key");
-    }
-
-    public String getStringPrice(int code) {
-        Item item = priceList.get(code);
-        if (item.getPriceTwo() < 100) {
-            return item.getPriceOne() + "." + item.getPriceTwo();
-        } else {
-            return item.getPriceOne() + item.getPriceTwo() / 100 + "." + item.getPriceTwo() % 100;
-        }
     }
 }
